@@ -81,43 +81,48 @@ void showTask(Task X[]){
 //     cout<<"Average waiting time: "<<(float)total_wait_time/total_task<<endl;
 // }
 
+void updateTimes(){
+
+}
+
 void roundRobin(int quantum){
-    cout<<"quantum: "<<quantum<<endl;
     int clk = 0;
     Task processing = waiting.front();
-    cout<<processing.pid<<"-burst: "<<processing.burst<<endl;
     waiting.pop();
     do{
         int runtime = quantum;
         for(int j=0; j<=quantum; j++){
-            //cout<<processing.pid<<" ";
+            cout<<processing.pid<<" ";
             while(!waiting.empty() && waiting.front().arival == clk){
-                
-                cout<<waiting.front().pid<<"-"<<clk<<" ";
+                //cout<<waiting.front().pid<<"-clk:"<<clk<<endl;
                 ready.push(waiting.front());
                 waiting.pop();
             };
-            
-            clk += j;
-            //processing.burst -= j;
-            //cout<<processing.pid<"-burst: "<<processing.burst<<endl;
+            if(j!=0)
+                clk++;
+            //cout<<processing.pid<<"-burst: "<<processing.burst<<endl;
             if(processing.burst-j==0){
                 //cout<<processing.pid<<"-"<<clk<<"  ";
-                processing = ready.front();
-                ready.pop();
+                // processing = ready.front();
+                // ready.pop();
                 runtime = j;
                 break;
             }
         }
         if(processing.burst-runtime != 0){
-            //cout<<processing.pid<<"-"<<clk<<"  ";
+            processing.burst -= runtime;
+            //cout<<processing.pid<<" ";
             ready.push(processing);
+            processing = ready.front();
+            ready.pop();
+        }else{
+            updateTimes();
+            processing = ready.front();
+            ready.pop();
         }
-        processing = ready.front();
-        ready.pop();
-        cout<<"hello"<<endl;
     }while(!ready.empty() || !waiting.empty());
-
+    clk++;
+    cout<<processing.pid<<endl;
 }
 
 int main(){
