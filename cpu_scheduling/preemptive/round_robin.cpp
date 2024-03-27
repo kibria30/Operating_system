@@ -17,10 +17,15 @@ struct Chart{
     int finish;
 };
 
-int total_task, quantum;
+int total_task;
 Task task[100];
+queue<Task> waiting;
 queue<Task> ready;
 queue<Chart> running;
+
+bool compare(const Task &a, const Task &b) {
+    return a.arival < b.arival;
+}
 
 void readInput(){
     cin>>total_task;
@@ -34,19 +39,6 @@ void showTask(Task X[]){
         cout<<task[i].pid<<" "<<task[i].arival<<" "<<task[i].burst<<endl;
     }
     cout<<endl;
-}
-
-void sort(){
-    Task temp;
-    for(int i=0; i<total_task-1; i++){
-        for(int j=0; j<total_task-1-i; j++){
-            if(task[j].arival > task[j+1].arival){
-                temp = task[j];
-                task[j] = task[j+1];
-                task[j+1] = temp;
-            }
-        }
-    }
 }
 
 // void printOutput(){
@@ -89,45 +81,57 @@ void sort(){
 //     cout<<"Average waiting time: "<<(float)total_wait_time/total_task<<endl;
 // }
 
-void roundRobin(){
-    ready.push(task[0]);
-    Chart selected;
-    int selectReadyFrom=1;
-    // selected.start = ready.front().arival;
-    // selected.pid = ready.front().pid;
-    // selected.finish = selected.start + quantum;
-    // running.push(selected);
-
-    while(!ready.empty()){        
-        if(ready.front().burst<quantum){
-            selected.start = ready.front().arival;
-            selected.pid = ready.front().pid;
-            selected.finish = selected.start + quantum;
-            running.push(selected);
+void roundRobin(int quantum){
+    cout<<"quantum: "<<quantum<<endl;
+    int clk = 0;
+    Task processing = waiting.front();
+    cout<<processing.pid<<"-burst: "<<processing.burst<<endl;
+    waiting.pop();
+    do{
+        int runtime = quantum;
+        for(int j=0; j<=quantum; j++){
+            //cout<<processing.pid<<" ";
+            while(!waiting.empty() && waiting.front().arival == clk){
+                
+                cout<<waiting.front().pid<<"-"<<clk<<" ";
+                ready.push(waiting.front());
+                waiting.pop();
+            };
+            
+            clk += j;
+            //processing.burst -= j;
+            //cout<<processing.pid<"-burst: "<<processing.burst<<endl;
+            if(processing.burst-j==0){
+                //cout<<processing.pid<<"-"<<clk<<"  ";
+                processing = ready.front();
+                ready.pop();
+                runtime = j;
+                break;
+            }
         }
-        else{
-            selected.start = ready.front().arival;
-            selected.pid = ready.front().pid;
-            selected.finish = selected.start + quantum;
-            running.push(selected);
+        if(processing.burst-runtime != 0){
+            //cout<<processing.pid<<"-"<<clk<<"  ";
+            ready.push(processing);
         }
+        processing = ready.front();
         ready.pop();
-        
-        for(int i=selectReadyFrom; i<total_task; i++){
-            if(task[i]. running.back().finish)
-        }
-    }
+        cout<<"hello"<<endl;
+    }while(!ready.empty() || !waiting.empty());
+
 }
 
 int main(){
-    freopen("tasks_2.txt", "r", stdin);
+    freopen("rr_input.txt", "r", stdin);
     readInput();
     showTask(task);
-    sort();
+    sort(task, task+total_task, compare);
     showTask(task);
-    quantum = 2;
+    for(int i=0; i<total_task; i++){
+        waiting.push(task[i]);
+    }
 
-    roundRobin();
+    int quantum = 2;
+    roundRobin(quantum);
     
     // for(int i=0; i<total_task; i++){
     //     ready[i] = task[i];
