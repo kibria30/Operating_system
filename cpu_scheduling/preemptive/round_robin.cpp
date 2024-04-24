@@ -36,7 +36,7 @@ void readInput(){
 
 void showTask(Task X[]){
     for(int i=0; i<total_task; i++){
-        cout<<task[i].pid<<" "<<task[i].arival<<" "<<task[i].burst<<endl;
+        cout<<task[i].pid<<" "<<task[i].arival<<" "<<task[i].burst<<" "<<task[i].completion<<" "<<endl;
     }
     cout<<endl;
 }
@@ -55,34 +55,38 @@ void showTask(Task X[]){
 //     cout<<endl;
 // }
 
-// void calculateTimes(){
-//     for(int i=0; i<total_task; i++){
-//         ready[i].turnaround = ready[i].completion - ready[i].arival;
-//         ready[i].wait = ready[i].turnaround - ready[i].burst;
-//     } 
-// }
+void calculateTimes(){
+    for(int i=0; i<total_task; i++){
+        task[i].turnaround = task[i].completion - task[i].arival;
+        task[i].wait = task[i].turnaround - task[i].burst;
+    } 
+}
 
-// void printTable(){
-//     cout<<"Process\t\t"<<"Burst_time\t"<<"Turnaround_Time\t\t"<<"Waiting_Time\t"<<endl;
-//     for(int i=0; i<total_task; i++){
-//         cout<<ready[i].pid<<"\t\t"<<ready[i].burst<<"\t\t"<<ready[i].turnaround<<"\t\t\t"<<ready[i].wait<<endl;
-//     }
-// }
+void printTable(){
+    cout<<"Process\t\t"<<"Burst_time\t"<<"Turnaround_Time\t\t"<<"Waiting_Time\t"<<endl;
+    for(int i=0; i<total_task; i++){
+        cout<<task[i].pid<<"\t\t"<<task[i].burst<<"\t\t"<<task[i].turnaround<<"\t\t\t"<<task[i].wait<<endl;
+    }
+}
 
-// void printAvgTimes(){
-//     int total_turn_time = 0;
-//     int total_wait_time = 0;
-//     for(int i=0; i<total_task; i++){
-//         total_turn_time += ready[i].turnaround;
-//         total_wait_time += ready[i].wait;
-//     }
+void printAvgTimes(){
+    int total_turn_time = 0;
+    int total_wait_time = 0;
+    for(int i=0; i<total_task; i++){
+        total_turn_time += task[i].turnaround;
+        total_wait_time += task[i].wait;
+    }
 
-//     cout<<"Average turnaround time: "<<(float)total_turn_time/total_task<<endl;
-//     cout<<"Average waiting time: "<<(float)total_wait_time/total_task<<endl;
-// }
+    cout<<"Average turnaround time: "<<(float)total_turn_time/total_task<<endl;
+    cout<<"Average waiting time: "<<(float)total_wait_time/total_task<<endl;
+}
 
-void updateTimes(){
-
+void updateTimes(string pid, int completion){
+    for(int i=0; i<total_task; i++){
+        if(task[i].pid == pid){
+            task[i].completion = completion;
+        }
+    }
 }
 
 void roundRobin(int quantum){
@@ -92,19 +96,25 @@ void roundRobin(int quantum){
     do{
         int runtime = quantum;
         for(int j=0; j<=quantum; j++){
-            cout<<processing.pid<<" ";
+            
             while(!waiting.empty() && waiting.front().arival == clk){
                 //cout<<waiting.front().pid<<"-clk:"<<clk<<endl;
                 ready.push(waiting.front());
                 waiting.pop();
             };
-            if(j!=0)
+            if(j!=0){
+                
+                cout<<processing.pid<<" ";
                 clk++;
+
+            }
+
             //cout<<processing.pid<<"-burst: "<<processing.burst<<endl;
             if(processing.burst-j==0){
                 //cout<<processing.pid<<"-"<<clk<<"  ";
                 // processing = ready.front();
                 // ready.pop();
+                updateTimes(processing.pid, clk);
                 runtime = j;
                 break;
             }
@@ -116,12 +126,13 @@ void roundRobin(int quantum){
             processing = ready.front();
             ready.pop();
         }else{
-            updateTimes();
+            
             processing = ready.front();
             ready.pop();
         }
     }while(!ready.empty() || !waiting.empty());
     clk++;
+    updateTimes(processing.pid, clk);
     cout<<processing.pid<<endl;
 }
 
@@ -159,7 +170,8 @@ int main(){
     //     }
     // }
     // printOutput();
-    // calculateTimes();
-    // printTable();
-    // printAvgTimes();
+    calculateTimes();
+    printTable();
+    printAvgTimes();
+    showTask(task);
 }
