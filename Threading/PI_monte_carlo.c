@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define TOTAL_POINTS 1000000 //
-#define NUM_THREADS 4
+#define TOTAL_POINTS 1000000
+#define NUM_THREADS 100
 
 int points_in_circle = 0;
 
