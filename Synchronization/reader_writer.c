@@ -8,7 +8,7 @@
 #define NUM_WRITERS 2
 
 sem_t rw_mutex;
-sem_t mutex;
+sem_t reader;
 int read_count=0;
 
 void *writer(void *args){
@@ -22,21 +22,21 @@ void *writer(void *args){
 
 void *reader(void *args){
     int reader_no = *(int *)args+1;
-    sem_wait(&mutex);
+    sem_wait(&reader);
     read_count++;
     if(read_count == 1){
         sem_wait(&rw_mutex);
     }
     printf("%dth reader is reading.\n", reader_no);
-    sem_post(&mutex);
+    sem_post(&reader);
 
     printf("%dth reader finished reading.\n", reader_no);
-    sem_wait(&mutex);
+    sem_wait(&reader);
     read_count--;
     if(read_count == 0){
         sem_post(&rw_mutex);
     }
-    sem_post(&mutex);
+    sem_post(&reader);
     usleep(2000000);
     return NULL;
 }
@@ -45,7 +45,7 @@ int main(){
     pthread_t reader_threads[NUM_READERS];
     pthread_t writer_threads[NUM_WRITERS];
     sem_init(&rw_mutex, 0, 1);
-    sem_init(&mutex, 0, 1);
+    sem_init(&reader, 0, 1);
 
     int i, j;
     int *reader_args[NUM_READERS];
@@ -70,6 +70,6 @@ int main(){
     }
 
     sem_destroy(&rw_mutex);
-    sem_destroy(&mutex);
+    sem_destroy(&reader);
     return 0;
 }
