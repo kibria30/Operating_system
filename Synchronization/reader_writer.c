@@ -8,7 +8,7 @@
 #define NUM_WRITERS 2
 
 sem_t rw_mutex;
-sem_t reader;
+sem_t reader_mutex;
 int read_count=0;
 
 void *writer(void *args){
